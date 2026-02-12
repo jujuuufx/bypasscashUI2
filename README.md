@@ -1,6 +1,3 @@
-# xezios UI Library Documentation
-
-A clean, modern, mobile-friendly Roblox UI library with theme support, configs, notifications, resizable/draggable windows, and full touch/mouse compatibility.
 
 ## Table of Contents
 
