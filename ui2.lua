@@ -165,16 +165,17 @@
             return Tween
         end
 
-       function Library:Resizify(Parent)
+  function Library:Resizify(Parent)
     local UIS = game:GetService("UserInputService")
     local Camera = workspace.CurrentCamera
 
     local mobile = UIS.TouchEnabled
 
+    -- === RESIZE HANDLE ===
     local Resizing = Library:Create("TextButton", {
         AnchorPoint = Vector2.new(1, 1),
-        Position     = dim2(1, 0, 1, 0),
-        Size         = mobile and dim2(0, 44, 0, 44) or dim2(0, 16, 0, 16),
+        Position = dim2(1, 0, 1, 0),
+        Size = mobile and dim2(0, 44, 0, 44) or dim2(0, 16, 0, 16),
         BorderSizePixel = 0,
         BackgroundTransparency = mobile and 0.92 or 1,
         Text = "",
@@ -187,7 +188,7 @@
         Resizing.BackgroundColor3 = Color3.fromRGB(180,180,180)
     end
 
-    -- ─── little red circle ────────────────────────────────────────
+    -- Little red indicator dot
     local RedDot = Library:Create("Frame", {
         AnchorPoint = Vector2.new(0.5, 0.5),
         Position    = dim2(0.5, 0, 0.5, 0),
@@ -199,182 +200,63 @@
     })
     Library:Create("UICorner", {CornerRadius = dim(0, 5), Parent = RedDot})
 
-            local IsResizing = false
-            local StartInputPos
-            local StartSize
+    local IsResizing = false
+    local StartInputPos
+    local StartSize
 
-            local MIN_SIZE = mobile and Vector2.new(220, 160) or Vector2.new(180, 120) -- Larger min for mobile
+    -- IMPORTANT: Minimum size (you can tweak these values)
+    local MIN_SIZE = mobile 
+        and Vector2.new(260, 180)     -- mobile: bigger minimum (readable on phone)
+        or  Vector2.new(220, 140)     -- desktop: a bit smaller but still usable
 
-            local function beginResize(input)
-                IsResizing = true
-                StartInputPos = input.Position
-                StartSize = Parent.Size
-                input.Changed:Connect(function()
-                    if input.UserInputState == Enum.UserInputState.End then
-                        IsResizing = false
-                    end
-                end)
+    local function beginResize(input)
+        IsResizing = true
+        StartInputPos = input.Position
+        StartSize = Parent.AbsoluteSize   -- better to use AbsoluteSize here
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                IsResizing = false
             end
+        end)
+    end
 
-            -- INPUT BEGIN
-            Resizing.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1
-                or input.UserInputType == Enum.UserInputType.Touch then
-                    beginResize(input)
-                end
-            end)
+    -- Start resize on click/touch
+    Resizing.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 
+        or input.UserInputType == Enum.UserInputType.Touch then
+            beginResize(input)
+        end
+    end)
 
-            -- INPUT END
-            Resizing.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1
-                or input.UserInputType == Enum.UserInputType.Touch then
-                    IsResizing = false
-                end
-            end)
-            
-            -- INPUT MOVE (Mouse or Touch)
-            UIS.InputChanged:Connect(function(input)
-                if not IsResizing then return end
-                if input.UserInputType ~= Enum.UserInputType.MouseMovement
-                and input.UserInputType ~= Enum.UserInputType.Touch then return end
+    Resizing.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 
+        or input.UserInputType == Enum.UserInputType.Touch then
+            IsResizing = false
+        end
+    end)
 
-                local delta = input.Position - StartInputPos
-                local viewport = Camera.ViewportSize
-
-                local newX = math.clamp(
-                    StartSize.X.Offset + delta.X,
-                    MIN_SIZE.X,
-                    viewport.X - Parent.AbsolutePosition.X
-                )
-
-                local newY = math.clamp(
-                    StartSize.Y.Offset + delta.Y,
-                    MIN_SIZE.Y,
-                    viewport.Y - Parent.AbsolutePosition.Y
-                )
-
-                Parent.Size = UDim2.fromOffset(newX, newY)
-            end)
+    -- Live resize movement
+    UIS.InputChanged:Connect(function(input)
+        if not IsResizing then return end
+        if input.UserInputType ~= Enum.UserInputType.MouseMovement 
+        and input.UserInputType ~= Enum.UserInputType.Touch then 
+            return 
         end
 
-        -- Improved Hovering for mobile input
-        function Library:Hovering(Object)
-            local x, y
+        local delta = input.Position - StartInputPos
+        local viewport = Camera.ViewportSize
 
-            if InputService.TouchEnabled then
-                -- On mobile, check latest touch location (or last mouse location as a fallback)
-                local lastTouch = nil
-                for _, input in ipairs(InputService:GetTouches()) do
-                    lastTouch = input 
-                    break
-                end
-                if lastTouch then
-                    x, y = lastTouch.Position.X, lastTouch.Position.Y
-                else
-                    local touchPos = InputService:GetMouseLocation() -- fallback (usually Tap/Mouse location)
-                    x, y = touchPos.X, touchPos.Y
-                end
-            end
+        -- Calculate new size with minimum clamping
+        local newX = math.max(MIN_SIZE.X, StartSize.X + delta.X)
+        local newY = math.max(MIN_SIZE.Y, StartSize.Y + delta.Y)
 
-            if not x or not y then
-                if mouse then
-                    x, y = mouse.X, mouse.Y
-                else
-                    -- fallback: try MouseLocation for both pc/mobile
-                    if InputService then
-                        local pos = InputService:GetMouseLocation()
-                        x, y = pos.X, pos.Y
-                    else
-                        return false
-                    end
-                end
-            end
+        -- Optional: also limit maximum size (viewport minus some padding)
+        newX = math.min(newX, viewport.X - Parent.AbsolutePosition.X - 20)
+        newY = math.min(newY, viewport.Y - Parent.AbsolutePosition.Y - 20)
 
-            if type(Object) == "table" then
-                for _, obj in pairs(Object) do
-                    if obj and Library:Hovering(obj) then
-                        return true
-                    end
-                end
-                return false
-            end
-
-            if not Object or not Object.AbsolutePosition then
-                return false
-            end
-
-            local pos = Object.AbsolutePosition
-            local size = Object.AbsoluteSize
-
-            return (
-                x >= pos.X and x <= pos.X + size.X and
-                y >= pos.Y and y <= pos.Y + size.Y
-            )
-        end
-
-        -- Update Draggify for mobile: handles both mouse, touch without clamping to screen bounds
-        function Library:Draggify(Parent)
-            local Dragging = false
-            local StartPos, StartInput
-            local Camera = workspace.CurrentCamera
-            local UIS = game:GetService("UserInputService")
-
-            local function beginDrag(input)
-                Dragging = true
-                StartInput = input.Position
-                StartPos = Parent.Position
-                -- For mobile, properly end drag on touch end
-                input.Changed:Connect(function()
-                    if input.UserInputState == Enum.UserInputState.End then
-                        Dragging = false
-                    end
-                end)
-            end
-
-            Parent.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1
-                or input.UserInputType == Enum.UserInputType.Touch then
-                    beginDrag(input)
-                end
-            end)
-
-            Parent.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1
-                or input.UserInputType == Enum.UserInputType.Touch then
-                    Dragging = false
-                end
-            end)
-
-            UIS.InputChanged:Connect(function(input)
-                if not Dragging then return end
-                if input.UserInputType ~= Enum.UserInputType.MouseMovement
-                and input.UserInputType ~= Enum.UserInputType.Touch then return end
-
-                local delta = input.Position - StartInput
-                local newX = StartPos.X.Offset + delta.X
-                local newY = StartPos.Y.Offset + delta.Y
-
-                -- No clamping, allow dragging through/outside the screen
-                Parent.Position = UDim2.new(0, newX, 0, newY)
-            end)
-
-            -- Fallback for legacy InputService or multi-touch cases
-            Library:Connection(InputService.InputChanged, function(Input, game_event) 
-                if Dragging and (
-                        Input.UserInputType == Enum.UserInputType.MouseMovement or
-                        (Input.UserInputType == Enum.UserInputType.Touch)
-                    ) then
-                    if not StartPos or not StartInput then return end
-
-                    local newX = StartPos.X.Offset + (Input.Position.X - StartInput.X)
-                    local newY = StartPos.Y.Offset + (Input.Position.Y - StartInput.Y)
-
-                    -- No clamping here either
-                    Parent.Position = UDim2.new(0, newX, 0, newY)
-                end
-            end)
-        end 
-
+        Parent.Size = UDim2.fromOffset(newX, newY)
+    end)
+end
 
         function Library:Convert(str)
             local Values = {}
