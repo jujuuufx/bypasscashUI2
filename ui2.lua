@@ -1,177 +1,118 @@
+-- Variables -- Services
+local InputService, HttpService, GuiService, RunService, Stats, CoreGui, TweenService, SoundService, Workspace, Players = game:GetService("UserInputService"), game:GetService("HttpService"), game:GetService("GuiService"), game:GetService("RunService"), game:GetService("Stats"), game:GetService("CoreGui"), game:GetService("TweenService"), game:GetService("SoundService"), game:GetService("Workspace"), game:GetService("Players")
+local Camera, lp, gui_offset = Workspace.CurrentCamera, Players.LocalPlayer, GuiService:GetGuiInset().Y
+local mouse = lp:GetMouse()
 
+-- Data types
+local vec2, vec3, dim2, dim, rect, dim_offset = Vector2.new, Vector3.new, UDim2.new, UDim.new, Rect.new, UDim2.fromOffset
 
-
--- Variables 
-    -- Services
-    local InputService, HttpService, GuiService, RunService, Stats, CoreGui, TweenService, SoundService, Workspace, Players = game:GetService("UserInputService"), game:GetService("HttpService"), game:GetService("GuiService"), game:GetService("RunService"), game:GetService("Stats"), game:GetService("CoreGui"), game:GetService("TweenService"), game:GetService("SoundService"), game:GetService("Workspace"), game:GetService("Players")
-    local Camera, lp, gui_offset = Workspace.CurrentCamera, Players.LocalPlayer, GuiService:GetGuiInset().Y
-    local mouse = lp:GetMouse()
-
-    -- Data types
-    local vec2, vec3, dim2, dim, rect, dim_offset = Vector2.new, Vector3.new, UDim2.new, UDim.new, Rect.new, UDim2.fromOffset
-
-    -- Extra data types
-    local color, rgb, hex, hsv, rgbseq, rgbkey, numseq, numkey = Color3.new, Color3.fromRGB, Color3.fromHex, Color3.fromHSV, ColorSequence.new, ColorSequenceKeypoint.new, NumberSequence.new, NumberSequenceKeypoint.new
--- 
+-- Extra data types
+local color, rgb, hex, hsv, rgbseq, rgbkey, numseq, numkey = Color3.new, Color3.fromRGB, Color3.fromHex, Color3.fromHSV, ColorSequence.new, ColorSequenceKeypoint.new, NumberSequence.new, NumberSequenceKeypoint.new
 
 -- Library init
-    getgenv().Library = {
-        Directory = "xezios",
-        Folders = {
-            "/fonts",
-            "/configs",
-        },
-        Flags = {},
-        ConfigFlags = {},
-        Connections = {},   
-        Notifications = {Notifs = {}},
-        OpenElement = {}; -- type: table or userdata
+getgenv().Library = {
+    Directory = "xezios",
+    Folders = { "/fonts", "/configs" },
+    Flags = {},
+    ConfigFlags = {},
+    Connections = {},
+    Notifications = {Notifs = {}},
+    OpenElement = {};
+}
+
+local themes = {
+    preset = {
+        accent = rgb(255, 0, 0),
+        window_outline = rgb(0, 0, 0),
+        inline = rgb(25, 27, 27),
+        background = rgb(17, 19, 19),
+        visible_backgrounds = rgb(20, 23, 22),
+        text_color = rgb(221, 223, 222),
+        glow = rgb(255, 0, 0),
+        deselected = rgb(89, 91, 91),
+    },
+    utility = {},
+    gradients = { Selected = {}; Deselected = {}; },
+}
+
+for theme,color in themes.preset do
+    themes.utility[theme] = {
+        BackgroundColor3 = {},
+        TextColor3 = {},
+        ImageColor3 = {},
+        ScrollBarImageColor3 = {},
+        Color = {},
     }
+end
 
-    local themes = {
-        preset = {
-            accent = rgb(255, 0, 0),
-            window_outline = rgb(0, 0, 0),
-            inline = rgb(25, 27, 27),
-            background = rgb(17, 19, 19),
-            visible_backgrounds = rgb(20, 23, 22),
-            text_color = rgb(221, 223, 222),
-            glow = rgb(255, 0, 0),  -- Pure red
-            deselected = rgb(89, 91, 91),
-        },
-        utility = {},
-        gradients = {
-            Selected = {};
-            Deselected = {};
-        },
-    }
+local Keys = {
+    [Enum.KeyCode.LeftShift] = "LS", [Enum.KeyCode.RightShift] = "RS",
+    [Enum.KeyCode.LeftControl] = "LC", [Enum.KeyCode.RightControl] = "RC",
+    [Enum.KeyCode.Insert] = "INS", [Enum.KeyCode.Backspace] = "BS",
+    [Enum.KeyCode.Return] = "Ent", [Enum.KeyCode.LeftAlt] = "LA",
+    [Enum.KeyCode.RightAlt] = "RA", [Enum.KeyCode.CapsLock] = "CAPS",
+    [Enum.KeyCode.One] = "1", [Enum.KeyCode.Two] = "2", [Enum.KeyCode.Three] = "3",
+    [Enum.KeyCode.Four] = "4", [Enum.KeyCode.Five] = "5", [Enum.KeyCode.Six] = "6",
+    [Enum.KeyCode.Seven] = "7", [Enum.KeyCode.Eight] = "8", [Enum.KeyCode.Nine] = "9",
+    [Enum.KeyCode.Zero] = "0", [Enum.KeyCode.KeypadOne] = "Num1",
+    [Enum.KeyCode.KeypadTwo] = "Num2", [Enum.KeyCode.KeypadThree] = "Num3",
+    [Enum.KeyCode.KeypadFour] = "Num4", [Enum.KeyCode.KeypadFive] = "Num5",
+    [Enum.KeyCode.KeypadSix] = "Num6", [Enum.KeyCode.KeypadSeven] = "Num7",
+    [Enum.KeyCode.KeypadEight] = "Num8", [Enum.KeyCode.KeypadNine] = "Num9",
+    [Enum.KeyCode.KeypadZero] = "Num0", [Enum.KeyCode.Minus] = "-",
+    [Enum.KeyCode.Equals] = "=", [Enum.KeyCode.Tilde] = "~",
+    [Enum.KeyCode.LeftBracket] = "[", [Enum.KeyCode.RightBracket] = "]",
+    [Enum.KeyCode.RightParenthesis] = ")", [Enum.KeyCode.LeftParenthesis] = "(",
+    [Enum.KeyCode.Semicolon] = ",", [Enum.KeyCode.Quote] = "'",
+    [Enum.KeyCode.BackSlash] = "\\", [Enum.KeyCode.Comma] = ",",
+    [Enum.KeyCode.Period] = ".", [Enum.KeyCode.Slash] = "/",
+    [Enum.KeyCode.Asterisk] = "*", [Enum.KeyCode.Plus] = "+",
+    [Enum.UserInputType.MouseButton1] = "MB1", [Enum.UserInputType.MouseButton2] = "MB2",
+    [Enum.UserInputType.MouseButton3] = "MB3", [Enum.KeyCode.Escape] = "ESC",
+    [Enum.KeyCode.Space] = "SPC",
+}
 
-    for theme,color in themes.preset do 
-        themes.utility[theme] = {
-            BackgroundColor3 = {}; 	
-            TextColor3 = {};
-            ImageColor3 = {};
-            ScrollBarImageColor3 = {};
-            Color = {};
-        }
-    end 
+Library.__index = Library
 
-    local Keys = {
-        [Enum.KeyCode.LeftShift] = "LS",
-        [Enum.KeyCode.RightShift] = "RS",
-        [Enum.KeyCode.LeftControl] = "LC",
-        [Enum.KeyCode.RightControl] = "RC",
-        [Enum.KeyCode.Insert] = "INS",
-        [Enum.KeyCode.Backspace] = "BS",
-        [Enum.KeyCode.Return] = "Ent",
-        [Enum.KeyCode.LeftAlt] = "LA",
-        [Enum.KeyCode.RightAlt] = "RA",
-        [Enum.KeyCode.CapsLock] = "CAPS",
-        [Enum.KeyCode.One] = "1",
-        [Enum.KeyCode.Two] = "2",
-        [Enum.KeyCode.Three] = "3",
-        [Enum.KeyCode.Four] = "4",
-        [Enum.KeyCode.Five] = "5",
-        [Enum.KeyCode.Six] = "6",
-        [Enum.KeyCode.Seven] = "7",
-        [Enum.KeyCode.Eight] = "8",
-        [Enum.KeyCode.Nine] = "9",
-        [Enum.KeyCode.Zero] = "0",
-        [Enum.KeyCode.KeypadOne] = "Num1",
-        [Enum.KeyCode.KeypadTwo] = "Num2",
-        [Enum.KeyCode.KeypadThree] = "Num3",
-        [Enum.KeyCode.KeypadFour] = "Num4",
-        [Enum.KeyCode.KeypadFive] = "Num5",
-        [Enum.KeyCode.KeypadSix] = "Num6",
-        [Enum.KeyCode.KeypadSeven] = "Num7",
-        [Enum.KeyCode.KeypadEight] = "Num8",
-        [Enum.KeyCode.KeypadNine] = "Num9",
-        [Enum.KeyCode.KeypadZero] = "Num0",
-        [Enum.KeyCode.Minus] = "-",
-        [Enum.KeyCode.Equals] = "=",
-        [Enum.KeyCode.Tilde] = "~",
-        [Enum.KeyCode.LeftBracket] = "[",
-        [Enum.KeyCode.RightBracket] = "]",
-        [Enum.KeyCode.RightParenthesis] = ")",
-        [Enum.KeyCode.LeftParenthesis] = "(",
-        [Enum.KeyCode.Semicolon] = ",",
-        [Enum.KeyCode.Quote] = "'",
-        [Enum.KeyCode.BackSlash] = "\\",
-        [Enum.KeyCode.Comma] = ",",
-        [Enum.KeyCode.Period] = ".",
-        [Enum.KeyCode.Slash] = "/",
-        [Enum.KeyCode.Asterisk] = "*",
-        [Enum.KeyCode.Plus] = "+",
-        [Enum.KeyCode.Period] = ".",
-        [Enum.KeyCode.Backquote] = "`",
-        [Enum.UserInputType.MouseButton1] = "MB1",
-        [Enum.UserInputType.MouseButton2] = "MB2",
-        [Enum.UserInputType.MouseButton3] = "MB3",
-        [Enum.KeyCode.Escape] = "ESC",
-        [Enum.KeyCode.Space] = "SPC",
-    }
-    
-    Library.__index = Library
+for _,path in Library.Folders do
+    makefolder(Library.Directory .. path)
+end
 
-    for _,path in Library.Folders do 
-        makefolder(Library.Directory .. path)
-    end
+local Flags = Library.Flags
+local ConfigFlags = Library.ConfigFlags
+local Notifications = Library.Notifications
 
-    local Flags = Library.Flags
-    local ConfigFlags = Library.ConfigFlags
-    local Notifications = Library.Notifications 
---
+-- Library functions
+function Library:GetTransparency(obj)
+    if obj:IsA("Frame") then return {"BackgroundTransparency"}
+    elseif obj:IsA("TextLabel") or obj:IsA("TextButton") then return { "TextTransparency", "BackgroundTransparency" }
+    elseif obj:IsA("ImageLabel") or obj:IsA("ImageButton") then return { "BackgroundTransparency", "ImageTransparency" }
+    elseif obj:IsA("ScrollingFrame") then return { "BackgroundTransparency", "ScrollBarImageTransparency" }
+    elseif obj:IsA("TextBox") then return { "TextTransparency", "BackgroundTransparency" }
+    elseif obj:IsA("UIStroke") then return { "Transparency" } end
+    return nil
+end
 
--- Library functions 
-    -- Misc functions
-        function Library:GetTransparency(obj)
-            if obj:IsA("Frame") then
-                return {"BackgroundTransparency"}
-            elseif obj:IsA("TextLabel") or obj:IsA("TextButton") then
-                return { "TextTransparency", "BackgroundTransparency" }
-            elseif obj:IsA("ImageLabel") or obj:IsA("ImageButton") then
-                return { "BackgroundTransparency", "ImageTransparency" }
-            elseif obj:IsA("ScrollingFrame") then
-                return { "BackgroundTransparency", "ScrollBarImageTransparency" }
-            elseif obj:IsA("TextBox") then
-                return { "TextTransparency", "BackgroundTransparency" }
-            elseif obj:IsA("UIStroke") then 
-                return { "Transparency" }
-            end 
+function Library:Tween(Object, Properties, Info)
+    local tween = TweenService:Create(Object, Info or TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.InOut), Properties)
+    tween:Play()
+    return tween
+end
 
-            return nil
-        end
+function Library:Fade(obj, prop, vis, speed)
+    if not (obj and prop) then return end
+    local OldTransparency = obj[prop]
+    obj[prop] = vis and 1 or OldTransparency
+    local Tween = Library:Tween(obj, { [prop] = vis and OldTransparency or 1 }, TweenInfo.new(speed or 0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.InOut))
+    Library:Connection(Tween.Completed, function()
+        if not vis then task.wait() obj[prop] = OldTransparency end
+    end)
+    return Tween
+end
 
-        function Library:Tween(Object, Properties, Info)
-            local tween = TweenService:Create(Object, Info or TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.InOut, 0, false, 0), Properties)
-            tween:Play()
-            return tween
-        end
-
-        function Library:Fade(obj, prop, vis, speed)
-            if not (obj and prop) then
-                return
-            end
-
-            local OldTransparency = obj[prop]
-            obj[prop] = vis and 1 or OldTransparency
-
-            local Tween = Library:Tween(obj, { [prop] = vis and OldTransparency or 1 }, TweenInfo.new(speed or 0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.InOut, 0, false, 0))
-
-            Library:Connection(Tween.Completed, function()
-                if not vis then
-                    task.wait()
-                    obj[prop] = OldTransparency
-                end
-            end)
-
-            return Tween
-        end
-
-       function Library:Resizify(Parent)
+function Library:Resizify(Parent)
     local UIS = game:GetService("UserInputService")
     local Camera = workspace.CurrentCamera
-
     local mobile = UIS.TouchEnabled
     local MIN_SIZE = mobile and Vector2.new(220, 160) or Vector2.new(180, 120)
 
@@ -201,374 +142,197 @@
         ZIndex = 10000,
         ScaleType = Enum.ScaleType.Fit,
     })
+
+    local IsResizing = false
+    local StartInputPos, StartSize
+
+    local function beginResize(input)
+        IsResizing = true
+        StartInputPos = input.Position
+        StartSize = Parent.Size
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                IsResizing = false
+            end
+        end)
+    end
+
+    Resizing.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            beginResize(input)
+        end
+    end)
+
+    Resizing.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            IsResizing = false
+        end
+    end)
+
+    UIS.InputChanged:Connect(function(input)
+        if not IsResizing then return end
+        if input.UserInputType ~= Enum.UserInputType.MouseMovement and input.UserInputType ~= Enum.UserInputType.Touch then return end
+        local delta = input.Position - StartInputPos
+        local viewport = Camera.ViewportSize
+        local newX = math.clamp(StartSize.X.Offset + delta.X, MIN_SIZE.X, viewport.X - Parent.AbsolutePosition.X)
+        local newY = math.clamp(StartSize.Y.Offset + delta.Y, MIN_SIZE.Y, viewport.Y - Parent.AbsolutePosition.Y)
+        Parent.Size = UDim2.fromOffset(newX, newY)
+    end)
 end
 
-            -- Optional for visual edge: 
-            if mobile then Resizing.BackgroundColor3 = Color3.fromRGB(180,180,180) end
+function Library:Hovering(Object)
+    local x, y
+    if InputService.TouchEnabled then
+        local lastTouch = nil
+        for _, input in ipairs(InputService:GetTouches()) do lastTouch = input break end
+        if lastTouch then x, y = lastTouch.Position.X, lastTouch.Position.Y
+        else local touchPos = InputService:GetMouseLocation() x, y = touchPos.X, touchPos.Y end
+    end
+    if not x or not y then
+        if mouse then x, y = mouse.X, mouse.Y
+        else if InputService then local pos = InputService:GetMouseLocation() x, y = pos.X, pos.Y else return false end end
+    end
+    if type(Object) == "table" then
+        for _, obj in pairs(Object) do if obj and Library:Hovering(obj) then return true end end return false
+    end
+    if not Object or not Object.AbsolutePosition then return false end
+    local pos = Object.AbsolutePosition local size = Object.AbsoluteSize
+    return (x >= pos.X and x <= pos.X + size.X and y >= pos.Y and y <= pos.Y + size.Y)
+end
 
-            local IsResizing = false
-            local StartInputPos
-            local StartSize
+function Library:Draggify(Parent)
+    local Dragging = false local StartPos, StartInput
+    local function beginDrag(input)
+        Dragging = true StartInput = input.Position StartPos = Parent.Position
+        input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then Dragging = false end end)
+    end
+    Parent.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then beginDrag(input) end
+    end)
+    Parent.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then Dragging = false end
+    end)
+    InputService.InputChanged:Connect(function(input)
+        if not Dragging then return end
+        if input.UserInputType ~= Enum.UserInputType.MouseMovement and input.UserInputType ~= Enum.UserInputType.Touch then return end
+        local delta = input.Position - StartInput
+        Parent.Position = UDim2.new(0, StartPos.X.Offset + delta.X, 0, StartPos.Y.Offset + delta.Y)
+    end)
+end
 
-            local MIN_SIZE = mobile and Vector2.new(220, 160) or Vector2.new(180, 120) -- Larger min for mobile
+function Library:Convert(str)
+    local Values = {}
+    for Value in string.gmatch(str, "[^,]+") do table.insert(Values, tonumber(Value)) end
+    if #Values == 4 then return unpack(Values) end
+end
 
-            local function beginResize(input)
-                IsResizing = true
-                StartInputPos = input.Position
-                StartSize = Parent.Size
-                input.Changed:Connect(function()
-                    if input.UserInputState == Enum.UserInputState.End then
-                        IsResizing = false
-                    end
-                end)
-            end
+function Library:Lerp(start, finish, t) t = t or 1/8 return start*(1-t) + finish*t end
 
-            -- INPUT BEGIN
-            Resizing.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1
-                or input.UserInputType == Enum.UserInputType.Touch then
-                    beginResize(input)
-                end
-            end)
+function Library:ConvertEnum(enum)
+    local EnumParts = {}
+    for part in string.gmatch(enum, "[%w_]+") do table.insert(EnumParts, part) end
+    local EnumTable = Enum
+    for i = 2, #EnumParts do EnumTable = EnumTable[EnumParts[i]] end
+    return EnumTable
+end
 
-            -- INPUT END
-            Resizing.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1
-                or input.UserInputType == Enum.UserInputType.Touch then
-                    IsResizing = false
-                end
-            end)
-            
-            -- INPUT MOVE (Mouse or Touch)
-            UIS.InputChanged:Connect(function(input)
-                if not IsResizing then return end
-                if input.UserInputType ~= Enum.UserInputType.MouseMovement
-                and input.UserInputType ~= Enum.UserInputType.Touch then return end
+function Library:ConvertHex(color, alpha)
+    local r = math.floor(color.R*255) local g = math.floor(color.G*255) local b = math.floor(color.B*255)
+    local a = alpha and math.floor(alpha*255) or 255
+    return string.format("#%02X%02X%02X%02X", r,g,b,a)
+end
 
-                local delta = input.Position - StartInputPos
-                local viewport = Camera.ViewportSize
+function Library:ConvertFromHex(color)
+    color = color:gsub("#","")
+    local r = tonumber(color:sub(1,2),16)/255
+    local g = tonumber(color:sub(3,4),16)/255
+    local b = tonumber(color:sub(5,6),16)/255
+    local a = tonumber(color:sub(7,8),16) and tonumber(color:sub(7,8),16)/255 or 1
+    return Color3.new(r,g,b), a
+end
 
-                local newX = math.clamp(
-                    StartSize.X.Offset + delta.X,
-                    MIN_SIZE.X,
-                    viewport.X - Parent.AbsolutePosition.X
-                )
+local ConfigHolder
+function Library:UpdateConfigList()
+    if not ConfigHolder then return end
+    local List = {}
+    for _,file in listfiles(Library.Directory .. "/configs") do
+        local Name = file:gsub(Library.Directory .. "/configs\\",""):gsub(".cfg",""):gsub(Library.Directory .. "\\configs\\","")
+        List[#List+1] = Name
+    end
+    ConfigHolder.RefreshOptions(List)
+end
 
-                local newY = math.clamp(
-                    StartSize.Y.Offset + delta.Y,
-                    MIN_SIZE.Y,
-                    viewport.Y - Parent.AbsolutePosition.Y
-                )
-
-                Parent.Size = UDim2.fromOffset(newX, newY)
-            end)
-        end
-
-        -- Improved Hovering for mobile input
-        function Library:Hovering(Object)
-            local x, y
-
-            if InputService.TouchEnabled then
-                -- On mobile, check latest touch location (or last mouse location as a fallback)
-                local lastTouch = nil
-                for _, input in ipairs(InputService:GetTouches()) do
-                    lastTouch = input 
-                    break
-                end
-                if lastTouch then
-                    x, y = lastTouch.Position.X, lastTouch.Position.Y
-                else
-                    local touchPos = InputService:GetMouseLocation() -- fallback (usually Tap/Mouse location)
-                    x, y = touchPos.X, touchPos.Y
-                end
-            end
-
-            if not x or not y then
-                if mouse then
-                    x, y = mouse.X, mouse.Y
-                else
-                    -- fallback: try MouseLocation for both pc/mobile
-                    if InputService then
-                        local pos = InputService:GetMouseLocation()
-                        x, y = pos.X, pos.Y
-                    else
-                        return false
-                    end
-                end
-            end
-
-            if type(Object) == "table" then
-                for _, obj in pairs(Object) do
-                    if obj and Library:Hovering(obj) then
-                        return true
-                    end
-                end
-                return false
-            end
-
-            if not Object or not Object.AbsolutePosition then
-                return false
-            end
-
-            local pos = Object.AbsolutePosition
-            local size = Object.AbsoluteSize
-
-            return (
-                x >= pos.X and x <= pos.X + size.X and
-                y >= pos.Y and y <= pos.Y + size.Y
-            )
-        end
-
-        -- Update Draggify for mobile: handles both mouse, touch without clamping to screen bounds
-        function Library:Draggify(Parent)
-            local Dragging = false
-            local StartPos, StartInput
-            local Camera = workspace.CurrentCamera
-            local UIS = game:GetService("UserInputService")
-
-            local function beginDrag(input)
-                Dragging = true
-                StartInput = input.Position
-                StartPos = Parent.Position
-                -- For mobile, properly end drag on touch end
-                input.Changed:Connect(function()
-                    if input.UserInputState == Enum.UserInputState.End then
-                        Dragging = false
-                    end
-                end)
-            end
-
-            Parent.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1
-                or input.UserInputType == Enum.UserInputType.Touch then
-                    beginDrag(input)
-                end
-            end)
-
-            Parent.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1
-                or input.UserInputType == Enum.UserInputType.Touch then
-                    Dragging = false
-                end
-            end)
-
-            UIS.InputChanged:Connect(function(input)
-                if not Dragging then return end
-                if input.UserInputType ~= Enum.UserInputType.MouseMovement
-                and input.UserInputType ~= Enum.UserInputType.Touch then return end
-
-                local delta = input.Position - StartInput
-                local newX = StartPos.X.Offset + delta.X
-                local newY = StartPos.Y.Offset + delta.Y
-
-                -- No clamping, allow dragging through/outside the screen
-                Parent.Position = UDim2.new(0, newX, 0, newY)
-            end)
-
-            -- Fallback for legacy InputService or multi-touch cases
-            Library:Connection(InputService.InputChanged, function(Input, game_event) 
-                if Dragging and (
-                        Input.UserInputType == Enum.UserInputType.MouseMovement or
-                        (Input.UserInputType == Enum.UserInputType.Touch)
-                    ) then
-                    if not StartPos or not StartInput then return end
-
-                    local newX = StartPos.X.Offset + (Input.Position.X - StartInput.X)
-                    local newY = StartPos.Y.Offset + (Input.Position.Y - StartInput.Y)
-
-                    -- No clamping here either
-                    Parent.Position = UDim2.new(0, newX, 0, newY)
-                end
-            end)
-        end 
-
-
-        function Library:Convert(str)
-            local Values = {}
-
-            for Value in string.gmatch(str, "[^,]+") do
-                table.insert(Values, tonumber(Value))
-            end
-
-            if #Values == 4 then              
-                return unpack(Values)
-            else
-                return
-            end
-        end
-        
-        function Library:Lerp(start, finish, t)
-            t = t or 1 / 8
-
-            return start * (1 - t) + finish * t
-        end
-
-        function Library:ConvertEnum(enum)
-            local EnumParts = {}
-            
-            for part in string.gmatch(enum, "[%w_]+") do
-                insert(EnumParts, part)
-            end
-        
-            local EnumTable = Enum
-
-            for i = 2, #EnumParts do
-                local EnumItem = EnumTable[EnumParts[i]]
-        
-                EnumTable = EnumItem
-            end
-            
-            return EnumTable
-        end
-
-        function Library:ConvertHex(color, alpha)
-            local r = math.floor(color.R * 255)
-            local g = math.floor(color.G * 255)
-            local b = math.floor(color.B * 255)
-            local a = alpha and math.floor(alpha * 255) or 255
-            return string.format("#%02X%02X%02X%02X", r, g, b, a)
-        end
-
-        function Library:ConvertFromHex(color)
-            color = color:gsub("#", "")
-            local r = tonumber(color:sub(1, 2), 16) / 255
-            local g = tonumber(color:sub(3, 4), 16) / 255
-            local b = tonumber(color:sub(5, 6), 16) / 255
-            local a = tonumber(color:sub(7, 8), 16) and tonumber(color:sub(7, 8), 16) / 255 or 1
-            return Color3.new(r, g, b), a
-        end
-
-        local ConfigHolder;
-        function Library:UpdateConfigList() 
-            if not ConfigHolder then 
-                print("no exist :(")
-                return 
-            end
-            
-            local List = {}
-            
-            for _,file in listfiles(Library.Directory .. "/configs") do
-                local Name = file:gsub(Library.Directory .. "/configs\\", ""):gsub(".cfg", ""):gsub(Library.Directory .. "\\configs\\", "")
-                List[#List + 1] = Name
-            end
-
-            for _,v in List do 
-                print(_,v)
-            end 
-
-            ConfigHolder.RefreshOptions(List)
-        end
-
-       function Library:Keypicker(properties)
+function Library:Keypicker(properties)
     local Cfg = {
-        Name = properties.Name or properties.name or "Color",
-        Flag = properties.Flag or properties.flag or properties.Name or properties.name or '' or "Colorpicker",
-        Callback = properties.callback or properties.Callback or function() end,
-        Color = properties.Color or color(1, 1, 1),
-        Alpha = properties.Alpha or properties.Transparency or 0,
+        Name = properties.Name or "Color",
+        Flag = properties.Flag or "Colorpicker",
+        Callback = properties.Callback or function() end,
+        Color = properties.Color or color(1,1,1),
+        Alpha = properties.Alpha or 0,
         Mode = properties.Mode or "Keypicker",
         Open = false,
-        Items = {};
+        Items = {},
     }
 
     local DraggingSat, DraggingHue, DraggingAlpha = false, false, false
     local h, s, v = Cfg.Color:ToHSV()
     local a = Cfg.Alpha
-
     Flags[Cfg.Flag] = {Color = Cfg.Color, Transparency = Cfg.Alpha}
-
     local Items = Cfg.Items
 
-    -- Button that opens the picker
     Items.Button = Library:Create("TextButton", {
-        Active = false,
-        BorderColor3 = rgb(0, 0, 0),
-        Text = "",
-        AutoButtonColor = false,
-        Name = "\0",
-        LayoutOrder = -1,
-        Parent = self.Items.Components,
-        Size = dim2(0, 28, 0, 14),
-        Selectable = false,
-        BorderSizePixel = 0,
-        BackgroundColor3 = rgb(26, 28, 28)
+        Active = false, BorderColor3 = rgb(0,0,0), Text = "", AutoButtonColor = false,
+        Name = "\0", LayoutOrder = -1, Parent = self.Items.Components,
+        Size = dim2(0,28,0,14), Selectable = false, BorderSizePixel = 0,
+        BackgroundColor3 = rgb(26,28,28)
     })
 
     Items.ButtonColor = Library:Create("Frame", {
-        Parent = Items.Button,
-        Name = "\0",
-        Position = dim2(0, 1, 0, 1),
-        BorderColor3 = rgb(0, 0, 0),
-        Size = dim2(1, -2, 1, -2),
-        BorderSizePixel = 0,
+        Parent = Items.Button, Name = "\0", Position = dim2(0,1,0,1),
+        BorderColor3 = rgb(0,0,0), Size = dim2(1,-2,1,-2), BorderSizePixel = 0,
         BackgroundColor3 = Cfg.Color
     })
 
-    Library:Create("UICorner", {Parent = Items.ButtonColor, CornerRadius = dim(0, 4)})
-    Library:Create("UICorner", {Parent = Items.Button, CornerRadius = dim(0, 4)})
+    Library:Create("UICorner", {Parent = Items.ButtonColor, CornerRadius = dim(0,4)})
+    Library:Create("UICorner", {Parent = Items.Button, CornerRadius = dim(0,4)})
 
-    -- Main picker window
     Items.Window = Library:Create("TextButton", {
-        Parent = Library.Other,
-        Text = "",
-        AutoButtonColor = false,
-        Active = false,
-        Name = "\0",
-        Position = dim2(0, 100, 0, 10),
-        BorderColor3 = rgb(0, 0, 0),
-        Size = dim2(0, 230, 0, 200),
-        BorderSizePixel = 0,
+        Parent = Library.Other, Text = "", AutoButtonColor = false, Active = false,
+        Name = "\0", Position = dim2(0,100,0,10), BorderColor3 = rgb(0,0,0),
+        Size = dim2(0,230,0,200), BorderSizePixel = 0,
         BackgroundColor3 = themes.preset.inline
     })
     Library:Themify(Items.Window, "inline", "BackgroundColor3")
 
     Items.Fade = Library:Create("Frame", {
-        Parent = Items.Window,
-        BackgroundTransparency = 1,
-        ZIndex = 500,
-        Name = "\0",
-        Position = dim2(0, 0, 0, 0),
-        BorderColor3 = rgb(0, 0, 0),
-        Size = dim2(1, 0, 1, 0),
-        BorderSizePixel = 0,
+        Parent = Items.Window, BackgroundTransparency = 1, ZIndex = 500,
+        Name = "\0", Position = dim2(0,0,0,0), BorderColor3 = rgb(0,0,0),
+        Size = dim2(1,0,1,0), BorderSizePixel = 0,
         BackgroundColor3 = themes.preset.inline
     })
 
     Library:Create("UICorner", {Parent = Items.Window})
 
     Items.Inline = Library:Create("Frame", {
-        Parent = Items.Window,
-        Name = "\0",
-        Position = dim2(0, 1, 0, 1),
-        BorderColor3 = rgb(0, 0, 0),
-        Size = dim2(1, -2, 1, -2),
-        BorderSizePixel = 0,
+        Parent = Items.Window, Name = "\0", Position = dim2(0,1,0,1),
+        BorderColor3 = rgb(0,0,0), Size = dim2(1,-2,1,-2), BorderSizePixel = 0,
         BackgroundColor3 = themes.preset.visible_backgrounds
     })
     Library:Themify(Items.Inline, "visible_backgrounds", "BackgroundColor3")
     Library:Create("UICorner", {Parent = Items.Inline})
 
     Items.Pallete = Library:Create("Frame", {
-        Parent = Items.Inline,
-        Name = "\0",
-        BackgroundTransparency = 1,
-        Position = dim2(0, 1, 0, 2),
-        BorderColor3 = rgb(0, 0, 0),
-        Size = dim2(1, -4, 1, -3),
-        BorderSizePixel = 0,
-        BackgroundColor3 = rgb(40, 40, 40)
+        Parent = Items.Inline, Name = "\0", BackgroundTransparency = 1,
+        Position = dim2(0,1,0,2), BorderColor3 = rgb(0,0,0),
+        Size = dim2(1,-4,1,-3), BorderSizePixel = 0,
+        BackgroundColor3 = rgb(40,40,40)
     })
 
-    -- SV square
     Items.SVArea = Library:Create("TextButton", {
-        Name = "\0",
-        Text = "",
-        AutoButtonColor = false,
-        Parent = Items.Pallete,
-        Position = dim2(0, 4, 0, 4),
-        Size = dim2(0, 150, 0, 150),
-        BorderSizePixel = 0,
-        BackgroundColor3 = rgb(255, 255, 255)
+        Name = "\0", Text = "", AutoButtonColor = false,
+        Parent = Items.Pallete, Position = dim2(0,4,0,4),
+        Size = dim2(0,150,0,150), BorderSizePixel = 0,
+        BackgroundColor3 = rgb(255,255,255)
     })
 
     Library:Create("UIGradient", {
@@ -583,56 +347,38 @@ end
     })
 
     Items.SVPicker = Library:Create("Frame", {
-        Parent = Items.SVArea,
-        AnchorPoint = Vector2.new(0.5, 0.5),
-        Position = dim2(s, 0, 1 - v, 0),
-        Size = dim2(0, 12, 0, 12),
-        BorderSizePixel = 2,
-        BorderColor3 = rgb(255,255,255),
-        BackgroundColor3 = rgb(0,0,0),
-        ZIndex = 10
+        Parent = Items.SVArea, AnchorPoint = Vector2.new(0.5,0.5),
+        Position = dim2(s,0,1-v,0), Size = dim2(0,12,0,12),
+        BorderSizePixel = 2, BorderColor3 = rgb(255,255,255),
+        BackgroundColor3 = rgb(0,0,0), ZIndex = 10
     })
     Library:Create("UICorner", {Parent = Items.SVPicker, CornerRadius = dim(1,0)})
 
-    -- Hue bar
     Items.HueBar = Library:Create("Frame", {
-        Parent = Items.Pallete,
-        Position = dim2(1, -26, 0, 4),
-        Size = dim2(0, 16, 0, 150),
-        BorderSizePixel = 0,
+        Parent = Items.Pallete, Position = dim2(1,-26,0,4),
+        Size = dim2(0,16,0,150), BorderSizePixel = 0,
         BackgroundColor3 = rgb(255,0,0)
     })
 
     Library:Create("UIGradient", {
-        Parent = Items.HueBar,
-        Rotation = 90,
+        Parent = Items.HueBar, Rotation = 90,
         Color = rgbseq{
-            rgbkey(0, rgb(255,0,0)),
-            rgbkey(0.167, rgb(255,255,0)),
-            rgbkey(0.333, rgb(0,255,0)),
-            rgbkey(0.5, rgb(0,255,255)),
-            rgbkey(0.667, rgb(0,0,255)),
-            rgbkey(0.833, rgb(255,0,255)),
+            rgbkey(0, rgb(255,0,0)), rgbkey(0.167, rgb(255,255,0)),
+            rgbkey(0.333, rgb(0,255,0)), rgbkey(0.5, rgb(0,255,255)),
+            rgbkey(0.667, rgb(0,0,255)), rgbkey(0.833, rgb(255,0,255)),
             rgbkey(1, rgb(255,0,0))
         }
     })
 
     Items.HuePicker = Library:Create("Frame", {
-        Parent = Items.HueBar,
-        Size = dim2(1, 4, 0, 6),
-        Position = dim2(0, -2, h, -3),
-        BackgroundColor3 = rgb(255,255,255),
-        BorderSizePixel = 1,
-        BorderColor3 = rgb(0,0,0),
-        ZIndex = 10
+        Parent = Items.HueBar, Size = dim2(1,4,0,6),
+        Position = dim2(0,-2,h,-3), BackgroundColor3 = rgb(255,255,255),
+        BorderSizePixel = 1, BorderColor3 = rgb(0,0,0), ZIndex = 10
     })
 
-    -- Alpha bar
     Items.AlphaBar = Library:Create("Frame", {
-        Parent = Items.Pallete,
-        Position = dim2(1, -26, 1, -26),
-        Size = dim2(0, 16, 0, 16),
-        BorderSizePixel = 0,
+        Parent = Items.Pallete, Position = dim2(1,-26,1,-26),
+        Size = dim2(0,16,0,16), BorderSizePixel = 0,
         BackgroundColor3 = rgb(255,255,255)
     })
 
@@ -642,89 +388,65 @@ end
         Rotation = 90
     })
 
-    Library:Create("UIGradient", {
-        Parent = Items.AlphaBar,
-        Transparency = numseq{numkey(0,0), numkey(1,1-a)},
-        Rotation = 90
-    })
-
     Items.AlphaPicker = Library:Create("Frame", {
-        Parent = Items.AlphaBar,
-        Size = dim2(1, 4, 0, 6),
-        Position = dim2(0, -2, 1-a, -3),
-        BackgroundColor3 = rgb(255,255,255),
-        BorderSizePixel = 1,
-        BorderColor3 = rgb(0,0,0),
-        ZIndex = 10
+        Parent = Items.AlphaBar, Size = dim2(1,4,0,6),
+        Position = dim2(0,-2,1-a,-3), BackgroundColor3 = rgb(255,255,255),
+        BorderSizePixel = 1, BorderColor3 = rgb(0,0,0), ZIndex = 10
     })
 
-    -- Update function
     local function updateAll()
-        local col = hsv(h, s, v)
+        local col = hsv(h,s,v)
         Items.ButtonColor.BackgroundColor3 = col
-        Items.SVArea.UIGradient.Color = rgbseq{rgbkey(0, rgb(255,255,255)), rgbkey(1, hsv(h,1,1))}
-        Items.SVPicker.Position = dim2(s, 0, 1-v, 0)
-        Items.HuePicker.Position = dim2(0, -2, h, -3)
-        Items.AlphaPicker.Position = dim2(0, -2, 1-a, -3)
-
+        Items.SVArea.UIGradient.Color = rgbseq{rgbkey(0,rgb(255,255,255)), rgbkey(1,hsv(h,1,1))}
+        Items.SVPicker.Position = dim2(s,0,1-v,0)
+        Items.HuePicker.Position = dim2(0,-2,h,-3)
+        Items.AlphaPicker.Position = dim2(0,-2,1-a,-3)
         Flags[Cfg.Flag] = {Color = col, Transparency = a}
         Cfg.Callback(col, a)
     end
 
-    -- Dragging logic
     local function onInputChanged(input)
         if not (DraggingSat or DraggingHue or DraggingAlpha) then return end
         if input.UserInputType ~= Enum.UserInputType.MouseMovement and input.UserInputType ~= Enum.UserInputType.Touch then return end
-
         local pos = input.Position
-
         if DraggingSat then
             local relX = math.clamp((pos.X - Items.SVArea.AbsolutePosition.X) / Items.SVArea.AbsoluteSize.X, 0, 1)
             local relY = math.clamp((pos.Y - Items.SVArea.AbsolutePosition.Y) / Items.SVArea.AbsoluteSize.Y, 0, 1)
-            s = relX
-            v = 1 - relY
+            s = relX v = 1 - relY
         elseif DraggingHue then
             h = math.clamp((pos.Y - Items.HueBar.AbsolutePosition.Y) / Items.HueBar.AbsoluteSize.Y, 0, 1)
         elseif DraggingAlpha then
             a = 1 - math.clamp((pos.Y - Items.AlphaBar.AbsolutePosition.Y) / Items.AlphaBar.AbsoluteSize.Y, 0, 1)
         end
-
         updateAll()
     end
 
-    -- Input handlers
     Items.SVArea.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            DraggingSat = true
-            onInputChanged(input)
+            DraggingSat = true onInputChanged(input)
         end
     end)
 
     Items.HueBar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            DraggingHue = true
-            onInputChanged(input)
+            DraggingHue = true onInputChanged(input)
         end
     end)
 
     Items.AlphaBar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            DraggingAlpha = true
-            onInputChanged(input)
+            DraggingAlpha = true onInputChanged(input)
         end
     end)
 
-    game:GetService("UserInputService").InputChanged:Connect(onInputChanged)
+    InputService.InputChanged:Connect(onInputChanged)
 
-    game:GetService("UserInputService").InputEnded:Connect(function(input)
+    InputService.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            DraggingSat = false
-            DraggingHue = false
-            DraggingAlpha = false
+            DraggingSat = false DraggingHue = false DraggingAlpha = false
         end
     end)
 
-    -- Open / close
     local function setVisible(visible)
         Items.Window.Visible = visible
         Items.Window.Parent = visible and Library.Items or Library.Other
@@ -736,8 +458,286 @@ end
         setVisible(not Cfg.Open)
     end)
 
-    -- Initial update
     updateAll()
+
+    return setmetatable(Cfg, Library)
+end
+
+function Library:GetConfig()
+    local g = {}
+    for Idx, Value in Flags do
+        if type(Value) == "table" and Value.key then
+            g[Idx] = {active = Value.Active, mode = Value.Mode, key = tostring(Value.Key)}
+        elseif type(Value) == "table" and Value["Transparency"] and Value["Color"] then
+            g[Idx] = {Transparency = Value["Transparency"], Color = Value["Color"]:ToHex()}
+        else
+            g[Idx] = Value
+        end
+    end
+    return HttpService:JSONEncode(g)
+end
+
+function Library:LoadConfig(JSON)
+    local g = HttpService:JSONDecode(JSON)
+    for Idx, Value in g do
+        if Idx == "config_name_list" then continue end
+        local Function = ConfigFlags[Idx]
+        if Function then
+            if type(Value) == "table" and Value["Transparency"] and Value["Color"] then
+                Function(hex(Value["Color"]), Value["Transparency"])
+            elseif type(Value) == "table" and Value["Active"] then
+                Function(Value)
+            else
+                Function(Value)
+            end
+        end
+    end
+end
+
+function Library:Round(num, float)
+    local Multiplier = 1 / (float or 1)
+    return math.floor(num * Multiplier + 0.5) / Multiplier
+end
+
+function Library:Themify(instance, theme, property)
+    table.insert(themes.utility[theme][property], instance)
+end
+
+function Library:RefreshTheme(theme, color)
+    for property,instances in themes.utility[theme] do
+        for _,object in instances do
+            if object[property] == themes.preset[theme] then
+                object[property] = color
+            end
+        end
+    end
+    themes.preset[theme] = color
+end
+
+function Library:Connection(signal, callback)
+    local connection = signal:Connect(callback)
+    table.insert(Library.Connections, connection)
+    return connection
+end
+
+function Library:CloseElement()
+    if not (Library.OpenElement and Library.OpenElement.SetVisible) then return end
+    Library.OpenElement.SetVisible(false)
+    Library.OpenElement.Open = false
+end
+
+function Library:Create(instance, options)
+    local ins = Instance.new(instance)
+    for prop, value in options do ins[prop] = value end
+    if ins:IsA("TextButton") then ins.AutoButtonColor = false ins.Text = "" end
+    return ins
+end
+
+function Library:Unload()
+    if Library.Items then Library.Items:Destroy() end
+    if Library.Other then Library.Other:Destroy() end
+    for _,connection in Library.Connections do connection:Disconnect() end
+    getgenv().Library = nil
+end
+
+-- Window
+function Library:Window(properties)
+    local Cfg = {
+        Prefix = properties.Prefix or "inferno.",
+        Suffix = properties.Suffix or "wtf",
+        Size = properties.Size or dim2(0,620,0,471),
+        TabInfo, Items = {},
+    }
+
+    local function makeDraggable(frame)
+        local dragging = false local dragStart, startPos
+        frame.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true dragStart = input.Position startPos = frame.Position
+                input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
+            end
+        end)
+        frame.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+        end)
+        local UIS = game:GetService("UserInputService")
+        UIS.InputChanged:Connect(function(input)
+            if not dragging then return end
+            if input.UserInputType ~= Enum.UserInputType.MouseMovement and input.UserInputType ~= Enum.UserInputType.Touch then return end
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(0, startPos.X.Offset + delta.X, 0, startPos.Y.Offset + delta.Y)
+        end)
+    end
+
+    Library.Items = Library:Create("ScreenGui", {Parent = CoreGui, Name = "\0", Enabled = true, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, IgnoreGuiInset = true, ResetOnSpawn = false})
+    Library.ToggleGui = Library:Create("ScreenGui", {Parent = CoreGui, Name = "\0", Enabled = true, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, IgnoreGuiInset = true, ResetOnSpawn = false})
+    Library.Other = Library:Create("ScreenGui", {Parent = CoreGui, Name = "\0", Enabled = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, IgnoreGuiInset = true, ResetOnSpawn = false})
+
+    local isMobile = InputService.TouchEnabled and not InputService.KeyboardEnabled
+
+    if isMobile then
+        local ToggleButton = Library:Create("ImageButton", {
+            Parent = Library.ToggleGui, Name = "ToggleButton",
+            Position = dim2(1,-70,0,20), Size = dim2(0,64,0,64),
+            BackgroundTransparency = 1, Image = "rbxassetid://122122220490038",
+            ZIndex = 1000
+        })
+        Library:Create("UICorner", {Parent = ToggleButton, CornerRadius = dim(0,4)})
+
+        local uiVisible = true local dragThreshold = 5
+        local function setUIVisible(visible)
+            uiVisible = visible Library.Items.Enabled = visible Library.Other.Enabled = false Library.ToggleGui.Enabled = true
+            if not visible and Library.OpenElement and Library.OpenElement.SetVisible then
+                pcall(function() Library.OpenElement.SetVisible(false) Library.OpenElement.Open = false end)
+            end
+        end
+
+        local isDragging, dragStart, buttonStart, dragConnection = false, nil, nil, nil
+        ToggleButton.InputBegan:Connect(function(input)
+            if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then return end
+            isDragging = false dragStart = input.Position buttonStart = ToggleButton.AbsolutePosition
+            if dragConnection then dragConnection:Disconnect() end
+            dragConnection = input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    if dragConnection then dragConnection:Disconnect() dragConnection = nil end
+                    if not isDragging then setUIVisible(not uiVisible) end
+                    isDragging = false dragStart = nil buttonStart = nil
+                end
+            end)
+        end)
+
+        InputService.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+                if dragStart and buttonStart then
+                    local delta = input.Position - dragStart
+                    if delta.Magnitude > dragThreshold then isDragging = true end
+                    local viewport = Camera.ViewportSize local buttonSize = ToggleButton.AbsoluteSize
+                    local newX = buttonStart.X + delta.X local newY = buttonStart.Y + delta.Y
+                    newX = math.clamp(newX, 0, viewport.X - buttonSize.X)
+                    newY = math.clamp(newY, 0, viewport.Y - buttonSize.Y)
+                    ToggleButton.Position = UDim2.fromOffset(newX, newY)
+                end
+            end
+        end)
+    end
+
+    local Items = Cfg.Items do
+        Items.Window = Library:Create("Frame", {
+            Parent = Library.Items, Name = "\0",
+            Position = dim2(0.5, -Cfg.Size.X.Offset/2, 0.5, -Cfg.Size.Y.Offset/2),
+            BorderColor3 = rgb(0,0,0), Size = Cfg.Size, BorderSizePixel = 0,
+            BackgroundColor3 = rgb(0,0,0)
+        })
+        Items.Window.Position = dim2(0, Items.Window.AbsolutePosition.X, 0, Items.Window.AbsolutePosition.Y)
+        Library:Themify(Items.Window, "window_outline", "BackgroundColor3")
+
+        Items.Outline = Library:Create("Frame", {
+            Parent = Items.Window, Name = "\0", Size = dim2(1,0,1,0),
+            BorderColor3 = rgb(0,0,0), ZIndex = 2, BorderSizePixel = 0,
+            BackgroundColor3 = rgb(0,0,0)
+        }) Library:Themify(Items.Outline, "window_outline", "BackgroundColor3")
+
+        Items.Inline = Library:Create("Frame", {
+            Parent = Items.Outline, Name = "\0", Position = dim2(0,1,0,1),
+            BorderColor3 = rgb(0,0,0), Size = dim2(1,-2,1,-2), BorderSizePixel = 0,
+            BackgroundColor3 = themes.preset.inline
+        }) Library:Themify(Items.Inline, "inline", "BackgroundColor3")
+
+        Items.TabHolderFrame = Library:Create("Frame", {
+            Parent = Items.Inline, Name = "\0", Position = dim2(0,1,0,1),
+            BorderColor3 = rgb(0,0,0), Size = dim2(0,139,1,-2), BorderSizePixel = 0,
+            BackgroundColor3 = rgb(12,14,14)
+        })
+
+        Items.Filler = Library:Create("Frame", {
+            Parent = Items.TabHolderFrame, Name = "\0", Position = dim2(1,-1,0,0),
+            BorderColor3 = rgb(0,0,0), Size = dim2(0,1,1,0), BorderSizePixel = 0,
+            BackgroundColor3 = themes.preset.inline
+        }) Library:Themify(Items.Filler, "inline", "BackgroundColor3")
+
+        Items.TabHolder = Library:Create("Frame", {
+            Parent = Items.TabHolderFrame, BackgroundTransparency = 1, Name = "\0",
+            BorderColor3 = rgb(0,0,0), Size = dim2(1,0,1,0), BorderSizePixel = 0,
+            BackgroundColor3 = rgb(255,255,255)
+        })
+
+        Library:Create("UIListLayout", {Parent = Items.TabHolder, Padding = dim(0,6), SortOrder = Enum.SortOrder.LayoutOrder})
+        Library:Create("UIPadding", {Parent = Items.TabHolder, PaddingTop = dim(0,6)})
+
+        Items.PageHolder = Library:Create("Frame", {
+            Parent = Items.Inline, Name = "\0", Position = dim2(0,140,0,1),
+            BorderColor3 = rgb(0,0,0), Size = dim2(1,-141,1,-2), BorderSizePixel = 0,
+            BackgroundColor3 = themes.preset.background
+        }) Library:Themify(Items.PageHolder, "background", "BackgroundColor3")
+
+        Items.TitleHolder = Library:Create("Frame", {
+            Parent = Items.PageHolder, BackgroundTransparency = 1, Name = "\0",
+            BorderColor3 = rgb(0,0,0), Size = dim2(1,0,0,43), BorderSizePixel = 0,
+            Active = true, BackgroundColor3 = rgb(255,255,255)
+        })
+
+        Items.Filler = Library:Create("Frame", {
+            Parent = Items.TitleHolder, Name = "\0", Position = dim2(0,0,1,-1),
+            BorderColor3 = rgb(0,0,0), Size = dim2(1,0,0,1), BorderSizePixel = 0,
+            BackgroundColor3 = themes.preset.inline
+        }) Library:Themify(Items.Filler, "inline", "BackgroundColor3")
+
+        Items.SectionTitle = Library:Create("TextLabel", {
+            RichText = true, Parent = Items.TitleHolder,
+            TextColor3 = themes.preset.accent, BorderColor3 = rgb(0,0,0),
+            Text = '<font color="rgb(255,255,255)">'..Cfg.Prefix..'</font>'..Cfg.Suffix,
+            Name = "\0", AutomaticSize = Enum.AutomaticSize.XY, AnchorPoint = vec2(0,0.5),
+            BorderSizePixel = 0, BackgroundTransparency = 1, Position = dim2(0,0,0.5,0),
+            FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal),
+            ZIndex = 2, TextSize = 20, BackgroundColor3 = rgb(255,255,255)
+        }) Library:Themify(Items.SectionTitle, "accent", "TextColor3")
+
+        Library:Create("UIPadding", {Parent = Items.SectionTitle, PaddingRight = dim(0,8), PaddingLeft = dim(0,13)})
+
+        Items.Pages = Library:Create("Frame", {
+            Parent = Items.PageHolder, Name = "\0", BackgroundTransparency = 1,
+            Position = dim2(0,0,0,43), BorderColor3 = rgb(0,0,0),
+            Size = dim2(1,0,1,-43), BorderSizePixel = 0,
+            BackgroundColor3 = rgb(255,255,255)
+        })
+
+        Items.Fade = Library:Create("Frame", {
+            Name = "\0", BackgroundTransparency = 1, Parent = Items.Pages,
+            BorderColor3 = rgb(0,0,0), Size = dim2(1,0,1,0), BorderSizePixel = 0,
+            BackgroundColor3 = rgb(17,19,19), ZIndex = 2
+        }) Library:Themify(Items.Fade, "background", "BackgroundColor3")
+
+        Items.Glow = Library:Create("ImageLabel", {
+            ImageColor3 = themes.preset.accent, ScaleType = Enum.ScaleType.Slice,
+            ImageTransparency = 0.65, BorderColor3 = rgb(0,0,0),
+            Parent = Items.Window, Name = "\0", Size = dim2(1,40,1,40),
+            Image = "rbxassetid://18245826428", BackgroundTransparency = 1,
+            Position = dim2(0,-20,0,-20), BackgroundColor3 = rgb(255,255,255),
+            BorderSizePixel = 0, SliceCenter = rect(vec2(21,21), vec2(79,79))
+        }) Library:Themify(Items.Glow, "glow", "ImageColor3")
+    end
+
+    makeDraggable(Items.TitleHolder)
+    Library:Resizify(Items.Window)
+
+    function Cfg.ToggleMenu(bool)
+        if Cfg.Tweening then return end
+        Cfg.Tweening = true Items.Window.Visible = true
+        local Children = Items.Window:GetDescendants() table.insert(Children, Items.Window)
+        local Tween
+        for _,obj in Children do
+            local Index = Library:GetTransparency(obj)
+            if not Index then continue end
+            if type(Index) == "table" then
+                for _,prop in Index do Tween = Library:Fade(obj, prop, bool) end
+            else
+                Tween = Library:Fade(obj, Index, bool)
+            end
+        end
+        Library:Connection(Tween.Completed, function()
+            task.wait() Cfg.Tweening = false Items.Window.Visible = bool
+        end)
+    end
 
     return setmetatable(Cfg, Library)
 end
@@ -944,17 +944,20 @@ end
             local UIS = game:GetService("UserInputService")
             local isMobile = UIS.TouchEnabled and not UIS.KeyboardEnabled
 
-    -- Toggle Button (mobile only)
-           if isMobile then
-    local ToggleButton = Library:Create("ImageButton", {
-        Parent = Library.ToggleGui;
-        Name = "ToggleButton";
-        Position = dim2(1, -70, 0, 20);
-        Size = dim2(0, 64, 0, 64);
-        BackgroundTransparency = 1;
-        Image = "rbxassetid://122122220490038";
-        ZIndex = 1000;
-    })
+            -- Toggle Button (mobile only)
+            if isMobile then
+                local ToggleButton = Library:Create("TextButton", {
+                    Parent = Library.ToggleGui;
+                    Name = "ToggleButton";
+                    Position = dim2(1, -60, 0, 10);
+                    Size = dim2(0, 50, 0, 50);
+                    BackgroundColor3 = rgb(0, 0, 0);
+                    BorderColor3 = rgb(0, 0, 0);
+                    BorderSizePixel = 0;
+                    Text = "";
+                    ZIndex = 1000;
+                })
+
                 Library:Create("UICorner", {
                     Parent = ToggleButton;
                     CornerRadius = dim(0, 4);
